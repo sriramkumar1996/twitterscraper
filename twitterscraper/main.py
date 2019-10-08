@@ -12,6 +12,7 @@ from twitterscraper.query import query_tweets_from_user
 from twitterscraper.query import query_user_info
 from twitterscraper.ts_logger import logger
 
+list_users = set()
 
 class JSONEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -37,6 +38,16 @@ def valid_date(s):
     except ValueError:
         msg = "Not a valid date: '{0}'.".format(s)
         raise argparse.ArgumentTypeError(msg)
+
+def get_tweets(user, query, limit, begindate, enddate, poolsize, lang):
+    if user:
+        for tweet in query_tweets_from_user(user=query, limit=limit):
+            list_users.add(tweet.username)
+            yield tweet    
+    else:
+        for tweet in query_tweets(query=query, limit=limit, begindate=begindate, enddate=enddate, poolsize=poolsize, lang=lang):
+            list_users.add(tweet.username)
+            yield tweet    
 
 def main():
     try:
@@ -99,31 +110,24 @@ def main():
         if args.all:
             args.begindate = dt.date(2006,3,1)
 
-        if args.user:
-            tweets = query_tweets_from_user(user = args.query, limit = args.limit)
-        else:
-            tweets = query_tweets(query = args.query, limit = args.limit,
-                              begindate = args.begindate, enddate = args.enddate,
-                              poolsize = args.poolsize, lang = args.lang)
-
         if args.dump:
-            print(json.dumps(tweets, cls=JSONEncoder))
+            for tweet in get_tweets(args.user, args.query, args.limit, args.begindate, args.enddate, args.poolsize, args.lang):
+                print(json.dumps(tweets, cls=JSONEncoder))
         else:
-            if tweets:
-                with open(args.output, "w", encoding="utf-8") as output:
-                    if args.csv:
-                        f = csv.writer(output, delimiter=";")
-                        f.writerow(["username", "fullname","user_id", "tweet_id", "tweet_url", "timestamp","timestamp_epochs",
-                                    "replies", "retweets", "likes", "is_retweet", "retweeter_username" , "retweeter_userid" ,
-                                    "retweet_id","text", "html"])
-                        for t in tweets:
-                            f.writerow([t.username, t.fullname,t.user_id, t.tweet_id, t.tweet_url, t.timestamp, t.timestamp_epochs,
-                                        t.replies, t.retweets, t.likes, t.is_retweet, t.retweeter_username , t.retweeter_userid ,
-                                        t.retweet_id, t.text, t.html])
-                    else:
-                        json.dump(tweets, output, cls=JSONEncoder)
-            if args.profiles and tweets:
-                list_users = list(set([tweet.user for tweet in tweets]))
+            with open(args.output, "a", encoding="utf-8") as output:
+                if args.csv:
+                    f = csv.writer(output, quoting=csv.QUOTE_MINIMAL)
+                    f.writerow(["username", "fullname", "user_id", "tweet_id", "tweet_url", "timestamp", "timestamp_epochs",
+                        "replies", "retweets", "likes", "is_retweet", "retweeter_username", "retweeter_userid", "retweet_id","text"])
+
+                    for t in get_tweets(args.user, args.query, args.limit, args.begindate, args.enddate, args.poolsize, args.lang):
+                        f.writerow([t.username, t.fullname,t.user_id, t.tweet_id, t.tweet_url, t.timestamp, t.timestamp_epochs,
+                            t.replies, t.retweets, t.likes, t.is_retweet, t.retweeter_username, t.retweeter_userid, t.retweet_id, t.text])       
+                else:
+                    for tweet in get_tweets(args.user, args.query, args.limit, args.begindate, args.enddate, args.poolsize, args.lang):
+                        json.dump(tweet, output, cls=JSONEncoder)  
+
+            if args.profiles:
                 list_users_info = [query_user_info(elem) for elem in list_users]
                 filename = 'userprofiles_' + args.output
                 with open(filename, "w", encoding="utf-8") as output:

@@ -1,4 +1,3 @@
-
 Synopsis
 ========
 
@@ -64,11 +63,11 @@ In addition it can scrape for the following user information:
 2. Installation and Usage
 =========================
 
-To install **twitterscraper**:
+To install **sriram-twitter-scraper**:
 
 .. code:: python
 
-    (sudo) pip install twitterscraper
+    (sudo) pip install sriram-twitter-scraper
 
 or you can clone the repository and in the folder containing setup.py
 
@@ -175,7 +174,7 @@ Also see `Twitter's Standard operators <https://developer.twitter.com/en/docs/tw
 
 
 2.2.3 Examples of scraping user pages
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 You can also scraped all tweets written or retweetet by a specific user. 
 This can be done by adding the boolean argument ``-u / --user`` argument. 
@@ -216,7 +215,7 @@ You can easily use TwitterScraper from within python:
 
 
 2.4 Scraping for retweets
-----------------------
+-------------------------
 
 A regular search within Twitter will not show you any retweets. 
 Twitterscraper therefore does not contain any retweets in the output. 
@@ -228,7 +227,7 @@ The only way you can scrape for retweets is if you scrape for all tweets of a sp
 
 
 2.5 Scraping for User Profile information
-----------------------
+-----------------------------------------
 By adding the argument ``--profiles`` twitterscraper will in addition to the tweets, also scrape for the profile information of the users who have written these tweets.
 The results will be saved in the file "userprofiles_<filename>".
 
@@ -263,7 +262,7 @@ What you should do is open the file with the proper encoding:
    Example of output with Japanese characters
 
 3.1.2 Opening into a pandas dataframe
----------------------------
+-------------------------------------
 
 After the file has been opened, it can easily be converted into a pandas DataFrame
 
